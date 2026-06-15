@@ -1,0 +1,32 @@
+#!/bin/bash
+
+CREDS="/run/user/$(id -u)/kiosk-creds"
+
+while true
+do
+    rm -f "$CREDS"
+
+    # 1. start login
+    systemctl --user start kiosk-login.service
+
+    # 2. wait until login exits
+    while systemctl --user is-active kiosk-login.service >/dev/null
+    do
+        sleep 0.2
+    done
+
+    # 3. validate creds
+    if [ ! -f "$CREDS" ]; then
+        continue
+    fi
+
+    # 4. run RDP
+    systemctl --user start kiosk-rdp.service
+
+    # 5. wait until RDP exits
+    while systemctl --user is-active kiosk-rdp.service >/dev/null
+    do
+        sleep 1
+    done
+
+done

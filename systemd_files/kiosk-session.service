@@ -1,0 +1,11 @@
+[Unit]
+Description=Kiosk Session Controller
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/kiosk-controller
+Restart=always
+
+[Install]
+WantedBy=default.target

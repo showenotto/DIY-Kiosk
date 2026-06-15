@@ -1,0 +1,10 @@
+[Unit]
+Description=RDP Session
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/kiosk-rdp
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

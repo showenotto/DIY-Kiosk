@@ -1,0 +1,12 @@
+[Unit]
+Description=GTK Login
+
+[Service]
+Type=simple
+Environment=GSK_RENDERER=cairo
+Environment=LIBGL_ALWAYS_SOFTWARE=1
+ExecStart=/usr/bin/python3 /usr/local/bin/kiosk-login.py
+Restart=no
+
+[Install]
+WantedBy=default.target

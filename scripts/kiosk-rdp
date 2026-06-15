@@ -1,0 +1,22 @@
+#!/bin/bash
+
+CREDS="/run/user/$(id -u)/kiosk-creds"
+
+if [ ! -f "$CREDS" ]; then
+    exit 1
+fi
+
+USER=$(cut -d: -f1 "$CREDS")
+PASS=$(cut -d: -f2- "$CREDS")
+
+exec /usr/bin/wlfreerdp3 \
+    /v:10.13.14.142 \
+    /u:"$USER" \
+    /p:"$PASS" \
+    /f \
+    /dynamic-resolution \
+    /cert:ignore \
+    +clipboard \
+    /sound:sys:pulse \
+    /network:auto
+
