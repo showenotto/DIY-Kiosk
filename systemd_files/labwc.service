@@ -1,0 +1,11 @@
+[Unit]
+Description=Labwc Wayland Session
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/labwc
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
