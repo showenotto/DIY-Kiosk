@@ -22,5 +22,5 @@
 vt = 1
 
 [default_session]
-command = "dbus-run-session labwc"
+command = "/usr/local/bin/kiosk-session"
 user = "kiosk"
