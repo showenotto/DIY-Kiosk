@@ -1,0 +1,8 @@
+#!/bin/sh
+
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+export XDG_SESSION_TYPE=wayland
+export XDG_SESSION_DESKTOP=labwc
+export XDG_CURRENT_DESKTOP=labwc
+
+exec dbus-run-session labwc
