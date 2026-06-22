@@ -16,5 +16,5 @@ exec /usr/bin/wlfreerdp3 \
     /f \
     /dynamic-resolution \
     /cert:ignore \
-    +clipboard \
+    +clipboard
 
