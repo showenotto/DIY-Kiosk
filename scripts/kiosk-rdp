@@ -17,6 +17,5 @@ exec /usr/bin/wlfreerdp3 \
     /dynamic-resolution \
     /cert:ignore \
     +clipboard \
-    /sound:sys:pulse \
     /network:auto
 
