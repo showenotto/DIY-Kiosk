@@ -5,4 +5,4 @@ export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=labwc
 export XDG_CURRENT_DESKTOP=labwc
 
-exec dbus-run-session labwc
+exec dbus-run-session labwc 2>/dev/null
