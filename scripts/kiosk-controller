@@ -10,21 +10,20 @@ do
     # 2. wait until login exits
     while systemctl --user is-active kiosk-login.service >/dev/null
     do
-        sleep 0.2
+        sleep 0.5
     done
 
-    # 3. validate creds
+    # 3. run RDP
     if [ ! -f "$CREDS" ]; then
         continue
     fi
-
-    # 4. run RDP
+    
     systemctl --user start kiosk-rdp.service
 
-    # 5. wait until RDP exits
+    # 4. wait until RDP exits
     while systemctl --user is-active kiosk-rdp.service >/dev/null
     do
-        sleep 1
+        sleep 0.5
     done
 
 done
