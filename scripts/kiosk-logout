@@ -1,0 +1,4 @@
+#!/bin/bash
+CREDS="/run/user/$(id -u)/kiosk-creds"
+rm -f "$CREDS" "/tmp/kiosk-status.txt" 2>/dev/null
+pkill -u "$(whoami)" -f wlfreerdp3 2>/dev/null || true
