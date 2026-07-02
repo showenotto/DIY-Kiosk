@@ -2,9 +2,11 @@
 Description=RDP Session
 
 [Service]
-Type=simple
+Type=oneshot
 ExecStart=/usr/local/bin/kiosk-rdp
-Restart=on-failure
+RemainAfterExit=yes   # ← Important
+Restart=no            # ← Critical: let controller manage the loop
+TimeoutStopSec=10
 
 [Install]
 WantedBy=default.target
