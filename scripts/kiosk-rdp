@@ -9,7 +9,7 @@ fi
 USER=$(cut -d: -f1 "$CREDS")
 PASS=$(cut -d: -f2- "$CREDS")
 
-/usr/bin/wlfreerdp3 \
+exec /usr/bin/wlfreerdp3 \
     /v:10.13.14.142 \
     /u:"$USER" \
     /p:"$PASS" \
