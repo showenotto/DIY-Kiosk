@@ -4,8 +4,6 @@ CREDS="/run/user/$(id -u)/kiosk-creds"
 
 while true
 do
-    rm -f "$CREDS"
-
     # 1. start login
     systemctl --user start kiosk-login.service
 
