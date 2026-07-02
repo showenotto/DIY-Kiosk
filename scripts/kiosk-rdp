@@ -1,11 +1,6 @@
 #!/bin/bash
 
 CREDS="/run/user/$(id -u)/kiosk-creds"
-
-if [ ! -f "$CREDS" ]; then
-    exit 1
-fi
-
 USER=$(cut -d: -f1 "$CREDS")
 PASS=$(cut -d: -f2- "$CREDS")
 
