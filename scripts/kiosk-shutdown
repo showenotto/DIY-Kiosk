@@ -1,0 +1,15 @@
+#!/bin/bash
+# Clear any existing alarm
+echo 0 > /sys/class/rtc/rtc0/wakealarm
+
+# Set wake time (example: 07:30 tomorrow)
+# You can calculate the exact epoch timestamp
+WAKE_EPOCH=$(date -d "tomorrow 07:30" +%s)
+echo $WAKE_EPOCH > /sys/class/rtc/rtc0/wakealarm
+
+# Optional: clean up kiosk state
+rm -f /run/user/$(id -u kiosk)/kiosk-creds
+systemctl --user -M kiosk@ stop kiosk-rdp.service kiosk-login.service 2>/dev/null || true
+
+# Enter low-power halt
+/sbin/poweroff

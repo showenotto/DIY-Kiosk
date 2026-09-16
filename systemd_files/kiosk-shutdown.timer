@@ -1,0 +1,10 @@
+# /etc/systemd/system/kiosk-nightly-shutdown.timer
+[Unit]
+Description=Daily kiosk shutdown timer
+
+[Timer]
+OnCalendar=*-*-* 22:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

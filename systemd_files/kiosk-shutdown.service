@@ -1,0 +1,7 @@
+# /etc/systemd/system/kiosk-nightly-shutdown.service
+[Unit]
+Description=Scheduled kiosk low-power shutdown
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/kiosk-scheduled-shutdown.sh
