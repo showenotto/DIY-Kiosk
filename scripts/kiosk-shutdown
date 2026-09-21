@@ -1,15 +1,37 @@
 #!/bin/bash
+# Scheduled low-power shutdown with RTC wake for kiosk Pis
+# Runs as root
+
+
+set -e
+
+RTC="/sys/class/rtc/rtc0/wakealarm"
+WAKE_HOUR=7          # Change these two lines to your desired wake time
+WAKE_MINUTE=30
+
+# Must be root
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Must be run as root"
+    exit 1
+fi
+
 # Clear any existing alarm
-echo 0 > /sys/class/rtc/rtc0/wakealarm
+echo 0 > "$RTC"
 
-# Set wake time (example: 07:30 tomorrow)
-# You can calculate the exact epoch timestamp
-WAKE_EPOCH=$(date -d "tomorrow 07:30" +%s)
-echo $WAKE_EPOCH > /sys/class/rtc/rtc0/wakealarm
+# Calculate absolute Unix timestamp for the next occurrence of the wake time
+WAKE_EPOCH=$(date -d "today ${WAKE_HOUR}:${WAKE_MINUTE}" +%s)
 
-# Optional: clean up kiosk state
-rm -f /run/user/$(id -u kiosk)/kiosk-creds
-systemctl --user -M kiosk@ stop kiosk-rdp.service kiosk-login.service 2>/dev/null || true
+# If that time has already passed today, schedule for tomorrow
+NOW=$(date +%s)
+if [ "$WAKE_EPOCH" -le "$NOW" ]; then
+    WAKE_EPOCH=$(date -d "tomorrow ${WAKE_HOUR}:${WAKE_MINUTE}" +%s)
+fi
 
-# Enter low-power halt
-/sbin/poweroff
+# Write the absolute timestamp
+echo "$WAKE_EPOCH" > "$RTC"
+
+# Log for debugging (optional)
+logger "Kiosk RTC wake set for $(date -d @$WAKE_EPOCH)"
+
+# Enter the low-power halt state
+/sbin/halt
