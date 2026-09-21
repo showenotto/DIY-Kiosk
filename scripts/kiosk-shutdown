@@ -6,9 +6,6 @@ set -e
 RTC="/sys/class/rtc/rtc0/wakealarm"
 
 # === CONFIGURE YOUR TIMES HERE ===
-SHUTDOWN_HOUR=22      # When the Pi should power off
-SHUTDOWN_MINUTE=00
-
 WAKE_HOUR=7           # When the Pi should wake up
 WAKE_MINUTE=30
 # =================================
