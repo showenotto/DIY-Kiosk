@@ -1,37 +1,47 @@
 #!/bin/bash
-# Scheduled low-power shutdown with RTC wake for kiosk Pis
-# Runs as root
-
+# Reliable RTC wake using relative offset (the method that works on Pi 5)
 
 set -e
 
 RTC="/sys/class/rtc/rtc0/wakealarm"
-WAKE_HOUR=7          # Change these two lines to your desired wake time
-WAKE_MINUTE=30
 
-# Must be root
+# === CONFIGURE YOUR TIMES HERE ===
+SHUTDOWN_HOUR=22      # When the Pi should power off
+SHUTDOWN_MINUTE=00
+
+WAKE_HOUR=7           # When the Pi should wake up
+WAKE_MINUTE=30
+# =================================
+
 if [ "$(id -u)" -ne 0 ]; then
-    echo "Must be run as root"
+    echo "This script must run as root"
     exit 1
 fi
 
-# Clear any existing alarm
+# Clear any previous alarm
 echo 0 > "$RTC"
 
-# Calculate absolute Unix timestamp for the next occurrence of the wake time
-WAKE_EPOCH=$(date -d "today ${WAKE_HOUR}:${WAKE_MINUTE}" +%s)
-
-# If that time has already passed today, schedule for tomorrow
+# Calculate how many seconds until the next wake time
 NOW=$(date +%s)
-if [ "$WAKE_EPOCH" -le "$NOW" ]; then
-    WAKE_EPOCH=$(date -d "tomorrow ${WAKE_HOUR}:${WAKE_MINUTE}" +%s)
+WAKE_TODAY=$(date -d "today ${WAKE_HOUR}:${WAKE_MINUTE}" +%s)
+
+if [ "$WAKE_TODAY" -gt "$NOW" ]; then
+    # Wake time is still later today
+    SECONDS_UNTIL_WAKE=$((WAKE_TODAY - NOW))
+else
+    # Wake time has already passed → schedule for tomorrow
+    WAKE_TOMORROW=$(date -d "tomorrow ${WAKE_HOUR}:${WAKE_MINUTE}" +%s)
+    SECONDS_UNTIL_WAKE=$((WAKE_TOMORROW - NOW))
 fi
 
-# Write the absolute timestamp
-echo "$WAKE_EPOCH" > "$RTC"
+# Write the relative offset (this is the form that works reliably)
+echo "+${SECONDS_UNTIL_WAKE}" > "$RTC"
 
-# Log for debugging (optional)
-logger "Kiosk RTC wake set for $(date -d @$WAKE_EPOCH)"
+# Verify
+echo "RTC wakealarm set to: $(cat $RTC)"
+echo "Will wake in ${SECONDS_UNTIL_WAKE} seconds ($(date -d @$((NOW + SECONDS_UNTIL_WAKE))))"
 
-# Enter the low-power halt state
+logger "Kiosk RTC relative wake set: +${SECONDS_UNTIL_WAKE}s"
+
+# Enter low-power state
 /sbin/halt
