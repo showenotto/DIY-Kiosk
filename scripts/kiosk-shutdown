@@ -54,9 +54,6 @@ echo "+${SECONDS_UNTIL_WAKE}" > "$RTC"
 echo "Wakealarm set: +${SECONDS_UNTIL_WAKE} seconds"
 echo "Will wake at approximately: $(date -d @$((NOW + SECONDS_UNTIL_WAKE)))"
 
-# Clean kiosk credentials
-rm -f /run/user/*/kiosk-creds 2>/dev/null || true
-
 logger "Kiosk shutdown: RTC synced and wake set for +${SECONDS_UNTIL_WAKE}s"
 
 # Enter low-power state
