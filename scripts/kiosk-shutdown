@@ -1,44 +1,63 @@
 #!/bin/bash
-# Reliable RTC wake using relative offset (the method that works on Pi 5)
+# Reliable RTC wake + accurate time keeping
 
 set -e
 
 RTC="/sys/class/rtc/rtc0/wakealarm"
 
 # === CONFIGURE YOUR TIMES HERE ===
-WAKE_HOUR=7           # When the Pi should wake up
+WAKE_HOUR=7
 WAKE_MINUTE=30
 # =================================
 
 if [ "$(id -u)" -ne 0 ]; then
-    echo "This script must run as root"
+    echo "Must run as root"
     exit 1
 fi
+
+echo "=== Syncing time from network ==="
+
+# Force a time sync (works with systemd-timesyncd)
+timedatectl set-ntp true
+sleep 2
+
+# Wait until the clock is actually synchronised (max 15 seconds)
+for i in {1..15}; do
+    if timedatectl status | grep -q "System clock synchronized: yes"; then
+        echo "Time is synchronized"
+        break
+    fi
+    sleep 1
+done
+
+# Write the accurate system time into the hardware RTC
+hwclock --systohc
+echo "Hardware RTC updated: $(hwclock -r)"
 
 # Clear any previous alarm
 echo 0 > "$RTC"
 
-# Calculate how many seconds until the next wake time
+# Calculate relative seconds until next wake time
 NOW=$(date +%s)
 WAKE_TODAY=$(date -d "today ${WAKE_HOUR}:${WAKE_MINUTE}" +%s)
 
 if [ "$WAKE_TODAY" -gt "$NOW" ]; then
-    # Wake time is still later today
     SECONDS_UNTIL_WAKE=$((WAKE_TODAY - NOW))
 else
-    # Wake time has already passed → schedule for tomorrow
     WAKE_TOMORROW=$(date -d "tomorrow ${WAKE_HOUR}:${WAKE_MINUTE}" +%s)
     SECONDS_UNTIL_WAKE=$((WAKE_TOMORROW - NOW))
 fi
 
-# Write the relative offset (this is the form that works reliably)
+# Set relative wakealarm (the reliable method)
 echo "+${SECONDS_UNTIL_WAKE}" > "$RTC"
 
-# Verify
-echo "RTC wakealarm set to: $(cat $RTC)"
-echo "Will wake in ${SECONDS_UNTIL_WAKE} seconds ($(date -d @$((NOW + SECONDS_UNTIL_WAKE))))"
+echo "Wakealarm set: +${SECONDS_UNTIL_WAKE} seconds"
+echo "Will wake at approximately: $(date -d @$((NOW + SECONDS_UNTIL_WAKE)))"
 
-logger "Kiosk RTC relative wake set: +${SECONDS_UNTIL_WAKE}s"
+# Clean kiosk credentials
+rm -f /run/user/*/kiosk-creds 2>/dev/null || true
+
+logger "Kiosk shutdown: RTC synced and wake set for +${SECONDS_UNTIL_WAKE}s"
 
 # Enter low-power state
 /sbin/halt
